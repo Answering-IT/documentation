@@ -257,3 +257,54 @@ sequenceDiagram
 * Usuario: “Crea una tarea” (sin detalles) → `FLOW_EXECUTION` pero Planner devuelve `missing_fields` → pregunta:
   “¿Título de la tarea, prioridad y fecha límite?”
 
+
+
+## Otros diagramas
+
+4) Mermaid: secuencia completa incluyendo Summarizer (nuevo)
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as Usuario
+  participant API as Backend
+  participant Router as Router Agent
+  participant Cerebro as Cerebro Retrieval
+  participant Planner as Flow Planner
+  participant Exec as Tool Execution
+  participant ERP as ERP/DB
+  participant Sum as Result Summarizer
+  participant Log as Event Logger
+  participant VS as Vector Store
+  participant Stream as Streaming Agent
+  participant LLM as LLM Provider
+
+  U->>API: mensaje
+  API->>Router: triage
+  Router-->>API: FLOW_EXECUTION + flow_id
+  API->>Cerebro: search context
+  Cerebro-->>API: context_pack
+  API->>Planner: plan con context_pack
+  Planner-->>API: tool_calls o question
+
+  alt tool_calls
+    API->>Stream: "Voy a crear..."
+    Stream-->>U: streaming progreso
+    API->>Exec: ejecutar tools
+    Exec->>ERP: POST /v1/tasks
+    ERP-->>Exec: tool_result_full
+    Exec-->>API: tool_result_full
+
+    API->>Sum: resumir resultado
+    Sum-->>API: result_summary + entities
+
+    API->>Log: guardar evento (summary)
+    Log->>VS: upsert vector_doc (desde summary)
+
+    API->>LLM: redactar respuesta final con summary
+    LLM-->>API: tokens
+    API-->>U: streaming respuesta final
+  else missing_fields
+    API-->>U: pregunta concreta
+  end
+```
