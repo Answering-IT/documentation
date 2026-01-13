@@ -1,4 +1,7 @@
 ---
+title: Manual FAIA Integral 2026
+date: 2026-01-13
+---
 
 ## 1) Qué es el programa y qué debe soportar el sistema
 
