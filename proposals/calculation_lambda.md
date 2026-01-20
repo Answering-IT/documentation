@@ -66,17 +66,36 @@ date: 2026-01-13
 * Jóvenes rurales: **18 a 28 años**, mujeres y jóvenes tienen prioridad y pueden acceder a % diferencial mayor. 
 * Validación operativa: sexo y edad contra documento de identidad. 
 
-### 3.4 Clasificación de productor (para validaciones y topes)
+### 3.4 Clasificación de productor (para validaciones y topes, referente a verificar si es productor)
 
-Tabla 3 define tamaños máximos UPA (ha) por grupo para pequeño vs mediano (en arroz se admite mediano; en otras cadenas, el universo objetivo es pequeño): 
+**Tabla 3. Tamaños máximos de UPA (ha) por grupo de cultivo**  
+*(Pequeño vs Mediano productor. En arroz se admite mediano; en las demás cadenas, el universo objetivo es pequeño productor).*
 
-* Tubérculos y plátano: pequeño **3,6** / mediano **10,8**
-* Cereales: pequeño **13,3** / mediano **40**
-* Leguminosas: pequeño **12,5** / mediano **30**
-* Verduras y hortalizas: pequeño **0,5** / mediano **3**
-* Frutas: pequeño **3** / mediano **10**
-* Caña panelera: pequeño **8** / mediano **24**
-* Algodón: pequeño **25** / mediano **550**
+| Grupo de Cultivo            | Cultivo            | Ha Pequeño Productor | Ha Mediano Productor |
+|-----------------------------|--------------------|----------------------|----------------------|
+| Cereales                    | Arroz              | 13                   | 40                   |
+| Cereales                    | Cebada             | 13.3                 | —                    |
+| Cereales                    | Maíz               | 13.3                 | —                    |
+| Cultivos Tropicales         | Caña Panelera      | 8                    | —                    |
+| Hortalizas                  | Ahuyama            | 0.5                  | —                    |
+| Hortalizas                  | Cebolla de bulbo   | 0.5                  | —                    |
+| Hortalizas                  | Cebolla de Rama    | 0.5                  | —                    |
+| Hortalizas                  | Tomate             | 0.5                  | —                    |
+| Hortalizas                  | Lechuga            | 0.5                  | —                    |
+| Hortalizas                  | Zanahoria          | 0.5                  | —                    |
+| Leguminosas                 | Habichuela         | 12.5                 | —                    |
+| Leguminosas                 | Arveja             | 12.5                 | —                    |
+| Leguminosas                 | Frijol             | 12.5                 | —                    |
+| Leguminosas                 | Soya               | 12.5                 | —                    |
+| Fibra vegetal               | Algodón            | 25                   | —                    |
+| Tubérculos y Plátano        | Ñame               | 3.6                  | —                    |
+| Tubérculos y Plátano        | Papa               | 3.6                  | —                    |
+| Tubérculos y Plátano        | Plátano            | 3.6                  | —                    |
+| Tubérculos y Plátano        | Yuca               | 3.6                  | —                    |
+| Tubérculos y Plátano        | Arracacha          | 3.6                  | —                    |
+| Frutales                    | Melón              | 3                    | —                    |
+| Frutales                    | Patilla            | 3                    | —                    |
+
 
 > **Decisión técnica recomendada**: en cadenas NO-arroz, si el productor excede “pequeño”, **rechazar** (no “capar”), porque el programa se orienta a pequeños (ACFEC) y el manual separa arroz como caso especial. 
 
