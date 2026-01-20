@@ -365,45 +365,71 @@ Campos recomendados:
 ---
 ### 8.4 Flujo de validación y cálculo de subsidio (No-arroz) adicional
  ```mermaid
-flowchart TD
-    A[Inicio] --> B[crop ≠ arroz<br/>maíz, papa, tomate, cebolla, etc.]
+sequenceDiagram
+    autonumber
+    actor Solicitante as Productor/Solicitante
+    participant App as Calculation Lambda / API
+    participant Rules as Reglas & Topes
 
-    B --> C{hectares ≤ maxUpaSmallProducer?}
+    Solicitante->>App: Solicita cálculo (crop≠arroz, hectares, items, flags)
+    App->>Rules: Obtener maxUpaSmallProducer por cultivo (Tabla 3)
+    Rules-->>App: maxUpaSmallProducer
 
-    C -->|NO| R1[RECHAZA<br/>NOT_SMALL_PRODUCER<br/>(HTTP 422)]
+    App->>App: Validar elegibilidad (hectares <= maxUpaSmallProducer)
 
-    C -->|SÍ| D{hectares > maxHectaresSupported?}
+    alt Elegible (SMALL)
+        App->>Rules: Obtener maxHectaresSupported y maxSupportAmount por cultivo
+        Rules-->>App: maxHectaresSupported, maxSupportAmount
 
-    D -->|SÍ| E[exceededHectaresCap = true<br/>subsidyAmount = maxSupportAmount<br/>(tope máximo)]
+        App->>App: Evaluar tope (hectares > maxHectaresSupported?)
 
-    D -->|NO| F[subsidyAmount = Σ(items × tasa)<br/>(con tope máximo)]
+        alt Excede hectáreas soportadas
+            App->>App: exceededHectaresCap = true
+            App->>App: subsidyAmount = maxSupportAmount
+        else No excede
+            App->>App: subsidyAmount = Σ(items × tasa)
+            App->>App: Aplicar tope máximo (min(subsidyAmount, maxSupportAmount))
+        end
 
-    E --> G[RESPUESTA 200]
-    F --> G
+        App-->>Solicitante: Respuesta 200 (subsidyAmount, producerPays, exceededHectaresCap)
+    else No elegible
+        App-->>Solicitante: Respuesta 422 NOT_SMALL_PRODUCER
+    end
 
-    G --> H[subsidyAmount<br/>producerPays<br/>exceededHectaresCap]
 ```
     
 ### 8.5 Flujo de validación y cálculo de subsidio (Arroz) adicional
  ```mermaid
-flowchart TD
-    A[Inicio] --> B[crop = arroz<br/>isRice = true]
+sequenceDiagram
+    autonumber
+    actor Solicitante as Productor/Solicitante
+    participant App as Calculation Lambda / API
+    participant Rules as Reglas & Topes (Zona/Tipo)
 
-    B --> C[Datos de contexto<br/>producerType: SMALL | MEDIUM<br/>riceZone]
+    Solicitante->>App: Solicita cálculo (crop=arroz, producerType, riceZone, hectares, purchaseAmount)
+    App->>Rules: Obtener maxUpaRiceByProducerType (SMALL=13, MEDIUM=40)
+    Rules-->>App: maxUpaRiceByProducerType
 
-    C --> D{hectares ≤ maxUpaRiceByProducerType?}
+    App->>App: Validar elegibilidad (hectares <= maxUpaRiceByProducerType)
 
-    D -->|NO| R1[RECHAZA<br/>NOT_ELIGIBLE_PRODUCER_TYPE<br/>(HTTP 422)]
+    alt Elegible (SMALL o MEDIUM)
+        App->>Rules: Obtener límites por (riceZone, producerType)
+        Rules-->>App: maxHectaresSupported, maxSupportAmount
 
-    D -->|SÍ| E{hectares > maxHectaresSupported?}
+        App->>App: Evaluar tope (hectares > maxHectaresSupported?)
 
-    E -->|SÍ| F[exceededHectaresCap = true<br/>subsidyAmount = maxSupportAmount<br/>(tope por zona y tipo)]
+        alt Excede hectáreas soportadas
+            App->>App: exceededHectaresCap = true
+            App->>App: subsidyAmount = maxSupportAmount
+        else No excede
+            App->>App: subsidyAmount = 100% de la compra
+            App->>App: Aplicar tope máximo (min(subsidyAmount, maxSupportAmount))
+        end
 
-    E -->|NO| G[subsidyAmount = 100% de la compra<br/>(con tope máximo)]
+        App-->>Solicitante: Respuesta 200 (subsidyAmount, producerPays, exceededHectaresCap, riceZone, producerType)
+    else No elegible
+        App-->>Solicitante: Respuesta 422 NOT_ELIGIBLE_PRODUCER_TYPE
+    end
 
-    F --> H[RESPUESTA 200]
-    G --> H
-
-    H --> I[subsidyAmount<br/>producerPays<br/>exceededHectaresCap<br/>riceZone<br/>producerType]
 ```
 ---
