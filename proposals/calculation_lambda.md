@@ -364,111 +364,46 @@ Campos recomendados:
 4. En plaguicidas: si tox I/II ⇒ **rechazo inmediato**.
 ---
 ### 8.4 Flujo de validación y cálculo de subsidio (No-arroz) adicional
- INICIO
-  |
-  v
-crop (cultivo)
-  - maíz
-  - papa
-  - tomate
-  - cebolla
-  - otros
-  |
-  v
-1. VALIDACIÓN DE ELEGIBILIDAD
-  ¿hectares <= maxUpaSmallProducer?
-  
-  Límites por cultivo:
-    - maíz:           <= 13.3 ha
-    - papa / yuca:    <= 3.6 ha
-    - tomate / cebolla<= 0.5 ha
-    - leguminosas:    <= 12.5 ha
-    - algodón:        <= 25 ha
-  |
-  +--> NO
-  |     RECHAZA
-  |     NOT_SMALL_PRODUCER (422)
-  |
-  +--> SÍ
-        |
-        v
-2. CÁLCULO DE SUBSIDIO
-  ¿hectares > maxHectaresSupported?
-  
-  Ejemplos:
-    - maíz:           > 8.87 ha
-    - papa / yuca:    > 3.6 ha
-    - tomate / cebolla> 0.5 ha
-  |
-  +--> SÍ
-  |     exceededHectaresCap = true
-  |     subsidio = maxSupportAmount
-  |     (tope máximo)
-  |
-  +--> NO
-        subsidio = Σ(items * tasa)
-        (con tope máximo)
-  |
-  v
-RESPUESTA (200)
-  - subsidyAmount
-  - producerPays
-  - exceededHectaresCap
+ ```mermaid
+flowchart TD
+    A[Inicio] --> B[crop ≠ arroz<br/>maíz, papa, tomate, cebolla, etc.]
+
+    B --> C{hectares ≤ maxUpaSmallProducer?}
+
+    C -->|NO| R1[RECHAZA<br/>NOT_SMALL_PRODUCER<br/>(HTTP 422)]
+
+    C -->|SÍ| D{hectares > maxHectaresSupported?}
+
+    D -->|SÍ| E[exceededHectaresCap = true<br/>subsidyAmount = maxSupportAmount<br/>(tope máximo)]
+
+    D -->|NO| F[subsidyAmount = Σ(items × tasa)<br/>(con tope máximo)]
+
+    E --> G[RESPUESTA 200]
+    F --> G
+
+    G --> H[subsidyAmount<br/>producerPays<br/>exceededHectaresCap]
+```
     
 ### 8.5 Flujo de validación y cálculo de subsidio (Arroz) adicional
-INICIO
-  |
-  v
-crop = "arroz"
-isRice = true
-  |
-  v
-Datos de contexto
-  - producerType: SMALL | MEDIUM
-  - riceZone:
-      * LLANOS
-      * BAJO_CAUCA
-      * CENTRO
-      * COSTA_NORTE
-      * SANTANDERES
-  |
-  v
-1. VALIDACIÓN DE ELEGIBILIDAD
-  ¿hectares <= maxUpaRiceByProducerType?
-  
-  Límites por tipo:
-    - SMALL:  <= 13 ha
-    - MEDIUM: <= 40 ha
-  |
-  +--> NO
-  |     RECHAZA
-  |     NOT_ELIGIBLE_PRODUCER_TYPE (422)
-  |
-  +--> SÍ
-        |
-        v
-2. CÁLCULO DE SUBSIDIO
-  ¿hectares > maxHectaresSupported?
-  
-  Límites por tipo:
-    - SMALL:  > 5 ha
-    - MEDIUM: > 11 ha
-  |
-  +--> SÍ
-  |     exceededHectaresCap = true
-  |     subsidio = maxSupportAmount
-  |     (tope por zona y tipo)
-  |
-  +--> NO
-        subsidio = 100% de la compra
-        (con tope máximo)
-  |
-  v
-RESPUESTA (200)
-  - subsidyAmount
-  - producerPays
-  - exceededHectaresCap
-  - riceZone
-  - producerType
----
+ ```mermaid
+flowchart TD
+    A[Inicio] --> B[crop = arroz<br/>isRice = true]
+
+    B --> C[Datos de contexto<br/>producerType: SMALL | MEDIUM<br/>riceZone]
+
+    C --> D{hectares ≤ maxUpaRiceByProducerType?}
+
+    D -->|NO| R1[RECHAZA<br/>NOT_ELIGIBLE_PRODUCER_TYPE<br/>(HTTP 422)]
+
+    D -->|SÍ| E{hectares > maxHectaresSupported?}
+
+    E -->|SÍ| F[exceededHectaresCap = true<br/>subsidyAmount = maxSupportAmount<br/>(tope por zona y tipo)]
+
+    E -->|NO| G[subsidyAmount = 100% de la compra<br/>(con tope máximo)]
+
+    F --> H[RESPUESTA 200]
+    G --> H
+
+    H --> I[subsidyAmount<br/>producerPays<br/>exceededHectaresCap<br/>riceZone<br/>producerType]
+```
 ---
