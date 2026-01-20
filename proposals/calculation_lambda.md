@@ -362,7 +362,7 @@ Campos recomendados:
    * **Topes monetarios** (máximo por productor: Tabla 8, 9, 10)
 3. En arroz: `pct=100%`, pero **igual** hay tope por zona y tipo de productor.
 4. En plaguicidas: si tox I/II ⇒ **rechazo inmediato**.
-
+---
 ### 8.4 Flujo de validación y cálculo de subsidio (No-arroz) adicional
  INICIO
   |
@@ -414,7 +414,7 @@ RESPUESTA (200)
   - subsidyAmount
   - producerPays
   - exceededHectaresCap
-
+    
 ### 8.5 Flujo de validación y cálculo de subsidio (Arroz) adicional
 INICIO
   |
@@ -470,4 +470,5 @@ RESPUESTA (200)
   - exceededHectaresCap
   - riceZone
   - producerType
+---
 ---
