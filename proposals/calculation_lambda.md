@@ -364,140 +364,110 @@ Campos recomendados:
 4. En plaguicidas: si tox I/II ⇒ **rechazo inmediato**.
 
 ### 8.4 Flujo de validación y cálculo de subsidio (No-arroz) adicional
- ┌─────────────────────────┐
-│      crop (cultivo)     │
-│   maíz, papa, tomate,   │
-│   cebolla, etc.         │
-└───────────┬─────────────┘
-            │
-            ▼
-┌─────────────────────────────────────────┐
-│ 1. VALIDACIÓN DE ELEGIBILIDAD            │
-│ ¿hectares <= maxUpaSmallProducer?        │
-│                                         │
-│ Ejemplos:                               │
-│ • maíz: <= 13.3 ha                      │
-│ • papa / yuca: <= 3.6 ha                │
-│ • tomate / cebolla: <= 0.5 ha           │
-│ • leguminosas: <= 12.5 ha               │
-│ • algodón: <= 25 ha                     │
-└───────────────────┬─────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-       SÍ                      NO
-        │                       │
-        ▼                       ▼
-┌───────────────┐     ┌─────────────────────────┐
-│ Continúa      │     │ RECHAZA                  │
-│               │     │ NOT_SMALL_PRODUCER (422) │
-└───────┬───────┘     └─────────────────────────┘
-        │
-        ▼
-┌─────────────────────────────────────────┐
-│ 2. CÁLCULO DE SUBSIDIO                   │
-│ ¿hectares > maxHectaresSupported?        │
-│                                         │
-│ Ejemplos:                               │
-│ • maíz: > 8.87 ha                       │
-│ • papa / yuca: > 3.6 ha                 │
-│ • tomate / cebolla: > 0.5 ha            │
-└───────────────────┬─────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-       SÍ                      NO
-        │                       │
-        ▼                       ▼
-┌─────────────────────────┐   ┌─────────────────────────┐
-│ exceededHectaresCap     │   │ Cálculo normal          │
-│ = true                  │   │                         │
-│                         │   │ subsidio =              │
-│ subsidio =              │   │ Σ(items * tasa)         │
-│ maxSupportAmount        │   │                         │
-│ (tope máximo)           │   │ (con tope máximo)       │
-└───────────┬─────────────┘   └───────────┬─────────────┘
-            │                             │
-            └───────────────┬─────────────┘
-                            ▼
-                ┌─────────────────────────┐
-                │ RESPUESTA (200)          │
-                │                         │
-                │ • subsidyAmount         │
-                │ • producerPays          │
-                │ • exceededHectaresCap   │
-                └─────────────────────────┘
-### 8.5 Flujo de validación y cálculo de subsidio (Arroz) adicional
-┌─────────────────────────┐
-│      crop = "arroz"     │
-│      isRice = true      │
-└───────────┬─────────────┘
-            │
-            ▼
-┌─────────────────────────┐
-│ producerType (SMALL /   │
-│        MEDIUM)          │
-│                         │
-│ riceZone (LLANOS,       │
-│ BAJO_CAUCA, CENTRO,     │
-│ COSTA_NORTE,            │
-│ SANTANDERES)            │
-└───────────┬─────────────┘
-            │
-            ▼
-┌─────────────────────────────────────────┐
-│ 1. VALIDACIÓN DE ELEGIBILIDAD            │
-│ ¿hectares <= maxUpaRiceByProducerType?   │
-│                                         │
-│ Límites por tipo de productor:          │
-│ • SMALL:  <= 13 ha                      │
-│ • MEDIUM: <= 40 ha                      │
-└───────────────────┬─────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-       SÍ                      NO
-        │                       │
-        ▼                       ▼
-┌───────────────┐     ┌──────────────────────────┐
-│ Continúa      │     │ RECHAZA                   │
-│               │     │ NOT_ELIGIBLE_PRODUCER_    │
-└───────┬───────┘     │ TYPE (422)                │
-        │             └──────────────────────────┘
-        ▼
-┌─────────────────────────────────────────┐
-│ 2. CÁLCULO DE SUBSIDIO                   │
-│ ¿hectares > maxHectaresSupported?        │
-│                                         │
-│ Límites por tipo:                       │
-│ • SMALL:  > 5 ha                         │
-│ • MEDIUM: > 11 ha                        │
-└───────────────────┬─────────────────────┘
-                    │
-        ┌───────────┴───────────┐
-        │                       │
-       SÍ                      NO
-        │                       │
-        ▼                       ▼
-┌─────────────────────────┐   ┌─────────────────────────┐
-│ exceededHectaresCap     │   │ Cálculo normal          │
-│ = true                  │   │                         │
-│                         │   │ subsidio = 100% compra  │
-│ subsidio =              │   │                         │
-│ maxSupportAmount        │   │ (con tope máximo)       │
-│ (tope por zona y tipo)  │   │                         │
-└───────────┬─────────────┘   └───────────┬─────────────┘
-            │                             │
-            └───────────────┬─────────────┘
-                            ▼
-                ┌─────────────────────────┐
-                │ RESPUESTA (200)          │
-                │                         │
-                │ • subsidyAmount         │
-                │ • producerPays          │
-                │ • exceededHectaresCap   │
-                │ • riceZone              │
-                │ • producerType          │
-                └─────────────────────────┘
+ INICIO
+  |
+  v
+crop (cultivo)
+  - maíz
+  - papa
+  - tomate
+  - cebolla
+  - otros
+  |
+  v
+1. VALIDACIÓN DE ELEGIBILIDAD
+  ¿hectares <= maxUpaSmallProducer?
+  
+  Límites por cultivo:
+    - maíz:           <= 13.3 ha
+    - papa / yuca:    <= 3.6 ha
+    - tomate / cebolla<= 0.5 ha
+    - leguminosas:    <= 12.5 ha
+    - algodón:        <= 25 ha
+  |
+  +--> NO
+  |     RECHAZA
+  |     NOT_SMALL_PRODUCER (422)
+  |
+  +--> SÍ
+        |
+        v
+2. CÁLCULO DE SUBSIDIO
+  ¿hectares > maxHectaresSupported?
+  
+  Ejemplos:
+    - maíz:           > 8.87 ha
+    - papa / yuca:    > 3.6 ha
+    - tomate / cebolla> 0.5 ha
+  |
+  +--> SÍ
+  |     exceededHectaresCap = true
+  |     subsidio = maxSupportAmount
+  |     (tope máximo)
+  |
+  +--> NO
+        subsidio = Σ(items * tasa)
+        (con tope máximo)
+  |
+  v
+RESPUESTA (200)
+  - subsidyAmount
+  - producerPays
+  - exceededHectaresCap
 
+### 8.5 Flujo de validación y cálculo de subsidio (Arroz) adicional
+INICIO
+  |
+  v
+crop = "arroz"
+isRice = true
+  |
+  v
+Datos de contexto
+  - producerType: SMALL | MEDIUM
+  - riceZone:
+      * LLANOS
+      * BAJO_CAUCA
+      * CENTRO
+      * COSTA_NORTE
+      * SANTANDERES
+  |
+  v
+1. VALIDACIÓN DE ELEGIBILIDAD
+  ¿hectares <= maxUpaRiceByProducerType?
+  
+  Límites por tipo:
+    - SMALL:  <= 13 ha
+    - MEDIUM: <= 40 ha
+  |
+  +--> NO
+  |     RECHAZA
+  |     NOT_ELIGIBLE_PRODUCER_TYPE (422)
+  |
+  +--> SÍ
+        |
+        v
+2. CÁLCULO DE SUBSIDIO
+  ¿hectares > maxHectaresSupported?
+  
+  Límites por tipo:
+    - SMALL:  > 5 ha
+    - MEDIUM: > 11 ha
+  |
+  +--> SÍ
+  |     exceededHectaresCap = true
+  |     subsidio = maxSupportAmount
+  |     (tope por zona y tipo)
+  |
+  +--> NO
+        subsidio = 100% de la compra
+        (con tope máximo)
+  |
+  v
+RESPUESTA (200)
+  - subsidyAmount
+  - producerPays
+  - exceededHectaresCap
+  - riceZone
+  - producerType
 ---
